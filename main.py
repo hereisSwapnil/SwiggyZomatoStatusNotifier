@@ -12,6 +12,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import os
+from dotenv import load_dotenv
+from selenium.webdriver.common.by import By
+
+load_dotenv()
 
 # Initialize Firebase
 cred = credentials.Certificate("firebase_credentials.json")
@@ -23,12 +27,12 @@ tz = timezone("Asia/Kolkata")
 tick = "✔️"
 cross = "❌"
 
-Admin = os.getenv("ADMIN_ID")
+Admin = os.environ.get("ADMIN_ID")
 
-bot = telebot.TeleBot(os.getenv("BOT_TOKEN"))
+bot = telebot.TeleBot(os.environ.get("BOT_TOKEN"))
 
-zlink = os.getenv("ZOMATO_LINK")
-slink = os.getenv("SWIGGY_LINK")
+zlink = os.environ.get("ZOMATO_LINK")
+slink = os.environ.get("SWIGGY_LINK")
 
 # Chrome options
 chrome_options = webdriver.ChromeOptions()
@@ -88,13 +92,9 @@ def zomato_check():
         driver.get(zlink)
         source = driver.page_source
         soup = bs(source, "html.parser")
-        pageHeader = soup.find("div", attrs={"class": "sc-fOICqy fPpMAv"})
-        pageStatusLine = pageHeader.find_all(
-            "section")[-1].text if pageHeader else None
+        pageStatusLine = driver.find_element(
+            by=By.XPATH, value=f"/html/body/div[1]/div/main/div/section[4]/section/section[2]/div[2]/div/div").get_attribute("innerHTML")
         print(pageStatusLine)
-        if not pageStatusLine:
-            raise Exception("Page status line not found")
-
         status_map = {
             "Opens in": "Offline",
             "Opens tomorrow": "Offline",
@@ -174,3 +174,5 @@ while True:
     except Exception as e:
         print(f"Error: {e}")
     t.sleep(5)
+
+# print(swiggy_check())
