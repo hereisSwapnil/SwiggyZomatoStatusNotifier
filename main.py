@@ -37,7 +37,7 @@ slink = os.environ.get("SWIGGY_LINK")
 
 # Chrome options
 chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless=new")
 # chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_experimental_option("prefs", {
@@ -105,7 +105,7 @@ def swiggy_check():
         "div", attrs={"class": "sc-kMribo bnHjVl"}) if pageHeader else None
     print("--->>>>")
     print(pageStatusLine)
-    if pageStatusLine:
+    if pageStatusLine != None:
         print(pageStatusLine)
         status_text = pageStatusLine.text.strip()
         if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
@@ -113,11 +113,14 @@ def swiggy_check():
             # bot.send_message(
             #     Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
             return ["Offline", get_date(), "Outlet is not accepting orders"]
+        else:
+            return ["Online", get_date(), "Online"]
     else:
         date = get_date()
         # bot.send_message(
         #     Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
         return ["Online", get_date(), "Online"]
+    print("hereee")
     # except Exception as e:
     #     error_message = (
     #         f"Error in Swiggy Status Check Function:\n"
@@ -216,29 +219,29 @@ def update_firestore_and_notify_users(platform, current_status, db_doc, link, ti
 
 def main():
     if is_time_between(time(9, 0), time(23, 10), dt.now(tz).time()):
-        zomato_current = zomato_check()
+        # zomato_current = zomato_check()
         swiggy_current = swiggy_check()
 
-        print(zomato_current)
+        # print(zomato_current)
         print(swiggy_current)
-        doc_zomato = db.collection("Zomato").document("Status")
-        doc_swiggy = db.collection("Swiggy").document("Status")
+        # doc_zomato = db.collection("Zomato").document("Status")
+        # doc_swiggy = db.collection("Swiggy").document("Status")
 
-        zomato_db = doc_zomato.get().to_dict().get("Status")
-        swiggy_db = doc_swiggy.get().to_dict().get("Status")
+        # zomato_db = doc_zomato.get().to_dict().get("Status")
+        # swiggy_db = doc_swiggy.get().to_dict().get("Status")
 
-        check_and_update_status("Zomato", zomato_current,
-                                zomato_db, doc_zomato, zlink, tick, cross)
-        check_and_update_status("Swiggy", swiggy_current,
-                                swiggy_db, doc_swiggy, slink, tick, cross)
+        # check_and_update_status("Zomato", zomato_current,
+        #                         zomato_db, doc_zomato, zlink, tick, cross)
+        # check_and_update_status("Swiggy", swiggy_current,
+        #                         swiggy_db, doc_swiggy, slink, tick, cross)
 
 
 while True:
-    try:
-        main()
-        t.sleep(40)
-    except Exception as e:
-        print(f"Error: {e}")
-    t.sleep(5)
+    # try:
+    main()
+    t.sleep(40)
+    # except Exception as e:
+    #     print(f"Error: {e}")
+    # t.sleep(5)
 
 # print(zomato_check())
