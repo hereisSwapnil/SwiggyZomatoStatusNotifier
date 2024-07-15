@@ -125,8 +125,6 @@ def swiggy_check():
         bot.send_message(
             Admin, f'{date}\n\n {error_message}', disable_web_page_preview=True, parse_mode="HTML")
         return ["Error", get_date(), str(e)]
-    finally:
-        driver.quit()
 
 
 def zomato_check():
@@ -185,8 +183,6 @@ def zomato_check():
         bot.send_message(
             Admin, f'{date}\n\n {error_message}', disable_web_page_preview=True, parse_mode="HTML")
         return ["Error", get_date(), str(e)]
-    finally:
-        driver.quit()
 
 
 def check_and_update_status(platform, current_status, db_status, db_doc, link, tick, cross):
