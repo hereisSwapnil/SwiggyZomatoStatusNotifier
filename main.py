@@ -37,7 +37,7 @@ slink = os.environ.get("SWIGGY_LINK")
 
 # Chrome options
 chrome_options = webdriver.ChromeOptions()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 # chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_experimental_option("prefs", {
@@ -150,27 +150,26 @@ def zomato_check():
         try:
             pageStatusLine = driver.find_element(
                 by=By.XPATH, value=f"/html/body/div[1]/div/main/div/section[4]/section/section[2]/div[2]/div/div").get_attribute("innerHTML")
+            status_map = {
+                "Opens in": "Offline",
+                "Opens tomorrow": "Offline",
+                "Opens at": "Offline",
+                "closes in": "Online",
+                "Currently closed": "Offline",
+                "Open now": "Online",
+                "Closes in": "Online"
+            }
+
+            for key in status_map:
+                if key in pageStatusLine:
+                    status = status_map[key]
+                    date = get_date()
+                    # bot.send_message(
+                    #     Admin, f'{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
+                    return [status, get_date(), status]
         except NoSuchElementException:
             date = get_date()
             return ["Online", get_date(), "Online"]
-
-        status_map = {
-            "Opens in": "Offline",
-            "Opens tomorrow": "Offline",
-            "Opens at": "Offline",
-            "closes in": "Online",
-            "Currently closed": "Offline",
-            "Open now": "Online",
-            "Closes in": "Online"
-        }
-
-        for key in status_map:
-            if key in pageStatusLine:
-                status = status_map[key]
-                date = get_date()
-                # bot.send_message(
-                #     Admin, f'{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
-                return [status, get_date(), status]
 
         return ["Error", get_date(), "Unrecognized status line"]
 
