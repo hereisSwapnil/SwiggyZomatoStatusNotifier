@@ -14,6 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import os
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 load_dotenv()
 
@@ -39,9 +40,6 @@ chrome_options = webdriver.ChromeOptions()
 # chrome_options.add_argument("--headless")
 # chrome_options.add_argument("--disable-dev-shm-usage")
 # chrome_options.add_argument("--no-sandbox")
-
-driver = webdriver.Chrome(service=Service(
-    ChromeDriverManager().install()), options=chrome_options)
 
 
 def is_time_between(begin_time, end_time, check_time=None):
@@ -70,31 +68,74 @@ def Get_USERS():
 
 
 def swiggy_check():
-    driver.get(slink)
-    source = driver.page_source
-    soup = bs(source, "html.parser")
-    pageHeader = soup.find("div", attrs={"class": "sc-kRRyDe thiEb"})
-    pageStatusLine = pageHeader.find(
-        "div", attrs={"class": "sc-kMribo bnHjVl"}) if pageHeader else None
-    print(pageStatusLine)
-    if pageStatusLine:
-        status_text = pageStatusLine.text if isinstance(
-            pageStatusLine, list) else pageStatusLine.text
-        if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
-            return ["Offline", get_date(), "Outlet is not accepting orders"]
-        else:
-            return ["Online", get_date(), "Online"]
-    return ["Error", get_date(), "Unable to determine status"]
+    try:
+        driver = webdriver.Chrome(service=Service(
+            ChromeDriverManager().install()), options=chrome_options)
+
+        latitude = 26.503010
+        longitude = 80.251297
+        accuracy = 100
+
+        driver.execute_cdp_cmd(
+            "Emulation.setGeolocationOverride",
+            {
+                "latitude": latitude,
+                "longitude": longitude,
+                "accuracy": accuracy,
+            },
+        )
+
+        driver.get(slink)
+        source = driver.page_source
+        soup = bs(source, "html.parser")
+        pageHeader = soup.find("div", attrs={"class": "sc-kRRyDe thiEb"})
+        pageStatusLine = pageHeader.find(
+            "div", attrs={"class": "sc-kMribo bnHjVl"}) if pageHeader else None
+
+        if pageStatusLine:
+            status_text = pageStatusLine.text.strip()
+            if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
+                return ["Offline", get_date(), "Outlet is not accepting orders"]
+            else:
+                return ["Online", get_date(), "Online"]
+        return ["Error", get_date(), "Unable to determine status"]
+
+    except Exception as e:
+        error_message = (
+            f"Error in Swiggy Status Check Function:\n"
+            f"Exception: {str(e)}"
+        )
+        send_error_message(error_message)
+        return ["Error", get_date(), str(e)]
+    finally:
+        driver.quit()
 
 
 def zomato_check():
     try:
+        driver = webdriver.Chrome(service=Service(
+            ChromeDriverManager().install()), options=chrome_options)
+
+        latitude = 26.503010
+        longitude = 80.251297
+        accuracy = 100
+
+        driver.execute_cdp_cmd(
+            "Emulation.setGeolocationOverride",
+            {
+                "latitude": latitude,
+                "longitude": longitude,
+                "accuracy": accuracy,
+            },
+        )
+
         driver.get(zlink)
-        source = driver.page_source
-        soup = bs(source, "html.parser")
-        pageStatusLine = driver.find_element(
-            by=By.XPATH, value=f"/html/body/div[1]/div/main/div/section[4]/section/section[2]/div[2]/div/div").get_attribute("innerHTML")
-        print(pageStatusLine)
+        try:
+            pageStatusLine = driver.find_element(
+                by=By.XPATH, value=f"/html/body/div[1]/div/main/div/section[4]/section/section[2]/div[2]/div/div").get_attribute("innerHTML")
+        except NoSuchElementException:
+            return ["Online", get_date(), "Online"]
+
         status_map = {
             "Opens in": "Offline",
             "Opens tomorrow": "Offline",
@@ -110,18 +151,17 @@ def zomato_check():
                 status = status_map[key]
                 return [status, get_date(), status]
 
-        bot.send_message(
-            Admin, f"<b>Error in Zomato Status Check Function</b>\n\nUnrecognized status line:\n{pageStatusLine}", parse_mode="HTML")
         return ["Error", get_date(), "Unrecognized status line"]
 
     except Exception as e:
         error_message = (
-            f"<b>Error in Zomato Status Check Function</b>\n\n"
-            f"Exception: {str(e)}\n"
-            f"Status Line: {pageStatusLine if 'pageStatusLine' in locals() else 'N/A'}"
+            f"Error in Zomato Status Check Function:\n"
+            f"Exception: {str(e)}"
         )
-        bot.send_message(Admin, error_message, parse_mode="HTML")
+        print(error_message)
         return ["Error", get_date(), str(e)]
+    finally:
+        driver.quit()
 
 
 def check_and_update_status(platform, current_status, db_status, db_doc, link, tick, cross):
@@ -155,16 +195,18 @@ def main():
         zomato_current = zomato_check()
         swiggy_current = swiggy_check()
 
-        doc_zomato = db.collection("Zomato").document("Status")
-        doc_swiggy = db.collection("Swiggy").document("Status")
+        print(zomato_current)
+        print(swiggy_current)
+        # doc_zomato = db.collection("Zomato").document("Status")
+        # doc_swiggy = db.collection("Swiggy").document("Status")
 
-        zomato_db = doc_zomato.get().to_dict().get("Status")
-        swiggy_db = doc_swiggy.get().to_dict().get("Status")
+        # zomato_db = doc_zomato.get().to_dict().get("Status")
+        # swiggy_db = doc_swiggy.get().to_dict().get("Status")
 
-        check_and_update_status("Zomato", zomato_current,
-                                zomato_db, doc_zomato, zlink, tick, cross)
-        check_and_update_status("Swiggy", swiggy_current,
-                                swiggy_db, doc_swiggy, slink, tick, cross)
+        # check_and_update_status("Zomato", zomato_current,
+        #                         zomato_db, doc_zomato, zlink, tick, cross)
+        # check_and_update_status("Swiggy", swiggy_current,
+        #                         swiggy_db, doc_swiggy, slink, tick, cross)
 
 
 while True:
