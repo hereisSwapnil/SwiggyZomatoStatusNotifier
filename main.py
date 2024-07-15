@@ -71,60 +71,62 @@ def Get_USERS():
 
 
 def swiggy_check():
-    try:
-        driver = webdriver.Chrome(service=Service(
-            ChromeDriverManager().install()), options=chrome_options)
+    # try:
+    driver = webdriver.Chrome(service=Service(
+        ChromeDriverManager().install()), options=chrome_options)
 
-        latitude = 26.503010
-        longitude = 80.251297
-        accuracy = 100
+    latitude = 26.503010
+    longitude = 80.251297
+    accuracy = 100
 
-        driver.execute_cdp_cmd(
-            "Emulation.setGeolocationOverride",
-            {
-                "latitude": latitude,
-                "longitude": longitude,
-                "accuracy": accuracy,
-            },
-        )
+    driver.execute_cdp_cmd(
+        "Emulation.setGeolocationOverride",
+        {
+            "latitude": latitude,
+            "longitude": longitude,
+            "accuracy": accuracy,
+        },
+    )
 
-        driver.get(slink)
-        locButtom = driver.find_element(
-            "xpath", "/html/body/div[1]/div[1]/header/div/div/div")
-        locButtom.click()
-        t.sleep(2)
-        locFetchButton = driver.find_element(
-            "xpath", "/html/body/div[2]/div/div/div[2]/div/div/div[3]/div/div[1]")
-        locFetchButton.click()
-        t.sleep(10)
-        driver.get(slink)
-        source = driver.page_source
-        soup = bs(source, "html.parser")
-        pageHeader = soup.find("div", attrs={"class": "sc-kRRyDe thiEb"})
-        pageStatusLine = pageHeader.find(
-            "div", attrs={"class": "sc-kMribo bnHjVl"}) if pageHeader else None
-        if pageStatusLine:
-            status_text = pageStatusLine.text.strip()
-            if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
-                date = get_date()
-                # bot.send_message(
-                #     Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
-                return ["Offline", get_date(), "Outlet is not accepting orders"]
-        else:
+    driver.get(slink)
+    locButtom = driver.find_element(
+        "xpath", "/html/body/div[1]/div[1]/header/div/div/div")
+    locButtom.click()
+    t.sleep(2)
+    locFetchButton = driver.find_element(
+        "xpath", "/html/body/div[2]/div/div/div[2]/div/div/div[3]/div/div[1]")
+    locFetchButton.click()
+    t.sleep(10)
+    driver.get(slink)
+    source = driver.page_source
+    soup = bs(source, "html.parser")
+    pageHeader = soup.find("div", attrs={"class": "sc-kRRyDe thiEb"})
+    pageStatusLine = pageHeader.find(
+        "div", attrs={"class": "sc-kMribo bnHjVl"}) if pageHeader else None
+    print("--->>>>")
+    print(pageStatusLine)
+    if pageStatusLine:
+        print(pageStatusLine)
+        status_text = pageStatusLine.text.strip()
+        if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
             date = get_date()
             # bot.send_message(
             #     Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
-            return ["Online", get_date(), "Online"]
-
-    except Exception as e:
-        error_message = (
-            f"Error in Swiggy Status Check Function:\n"
-            f"Exception: {str(e)}"
-        )
+            return ["Offline", get_date(), "Outlet is not accepting orders"]
+    else:
         date = get_date()
-        bot.send_message(
-            Admin, f'{date}\n\n {error_message}', disable_web_page_preview=True, parse_mode="HTML")
-        return ["Error", get_date(), str(e)]
+        # bot.send_message(
+        #     Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
+        return ["Online", get_date(), "Online"]
+    # except Exception as e:
+    #     error_message = (
+    #         f"Error in Swiggy Status Check Function:\n"
+    #         f"Exception: {str(e)}"
+    #     )
+    #     date = get_date()
+    #     bot.send_message(
+    #         Admin, f'{date}\n\n {error_message}', disable_web_page_preview=True, parse_mode="HTML")
+    #     return ["Error", get_date(), str(e)]
 
 
 def zomato_check():
@@ -150,6 +152,8 @@ def zomato_check():
         try:
             pageStatusLine = driver.find_element(
                 by=By.XPATH, value=f"/html/body/div[1]/div/main/div/section[4]/section/section[2]/div[2]/div/div").get_attribute("innerHTML")
+            print("--->>>>")
+            print(pageStatusLine)
             status_map = {
                 "Opens in": "Offline",
                 "Opens tomorrow": "Offline",
@@ -237,4 +241,4 @@ while True:
         print(f"Error: {e}")
     t.sleep(5)
 
-# print(swiggy_check())
+# print(zomato_check())
