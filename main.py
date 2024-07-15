@@ -95,8 +95,14 @@ def swiggy_check():
         if pageStatusLine:
             status_text = pageStatusLine.text.strip()
             if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
+                date = get_date()
+                bot.send_message(
+                    Admin, '{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
                 return ["Offline", get_date(), "Outlet is not accepting orders"]
             else:
+                date = get_date()
+                bot.send_message(
+                    Admin, '{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
                 return ["Online", get_date(), "Online"]
         return ["Error", get_date(), "Unable to determine status"]
 
@@ -134,6 +140,9 @@ def zomato_check():
             pageStatusLine = driver.find_element(
                 by=By.XPATH, value=f"/html/body/div[1]/div/main/div/section[4]/section/section[2]/div[2]/div/div").get_attribute("innerHTML")
         except NoSuchElementException:
+            date = get_date()
+            bot.send_message(
+                Admin, '{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
             return ["Online", get_date(), "Online"]
 
         status_map = {
@@ -149,6 +158,9 @@ def zomato_check():
         for key in status_map:
             if key in pageStatusLine:
                 status = status_map[key]
+                date = get_date()
+                bot.send_message(
+                    Admin, '{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
                 return [status, get_date(), status]
 
         return ["Error", get_date(), "Unrecognized status line"]
