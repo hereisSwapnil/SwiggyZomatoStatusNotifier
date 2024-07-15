@@ -37,9 +37,9 @@ slink = os.environ.get("SWIGGY_LINK")
 
 # Chrome options
 chrome_options = webdriver.ChromeOptions()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 # chrome_options.add_argument("--disable-dev-shm-usage")
-# chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--no-sandbox")
 
 
 def is_time_between(begin_time, end_time, check_time=None):
@@ -97,12 +97,12 @@ def swiggy_check():
             if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
                 date = get_date()
                 bot.send_message(
-                    Admin, '{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
+                    Admin, f'{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
                 return ["Offline", get_date(), "Outlet is not accepting orders"]
             else:
                 date = get_date()
                 bot.send_message(
-                    Admin, '{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
+                    Admin, f'{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
                 return ["Online", get_date(), "Online"]
         return ["Error", get_date(), "Unable to determine status"]
 
@@ -160,7 +160,7 @@ def zomato_check():
                 status = status_map[key]
                 date = get_date()
                 bot.send_message(
-                    Admin, '{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
+                    Admin, f'{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
                 return [status, get_date(), status]
 
         return ["Error", get_date(), "Unrecognized status line"]
