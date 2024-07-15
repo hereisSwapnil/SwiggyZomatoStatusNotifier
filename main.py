@@ -197,16 +197,16 @@ def main():
 
         print(zomato_current)
         print(swiggy_current)
-        # doc_zomato = db.collection("Zomato").document("Status")
-        # doc_swiggy = db.collection("Swiggy").document("Status")
+        doc_zomato = db.collection("Zomato").document("Status")
+        doc_swiggy = db.collection("Swiggy").document("Status")
 
-        # zomato_db = doc_zomato.get().to_dict().get("Status")
-        # swiggy_db = doc_swiggy.get().to_dict().get("Status")
+        zomato_db = doc_zomato.get().to_dict().get("Status")
+        swiggy_db = doc_swiggy.get().to_dict().get("Status")
 
-        # check_and_update_status("Zomato", zomato_current,
-        #                         zomato_db, doc_zomato, zlink, tick, cross)
-        # check_and_update_status("Swiggy", swiggy_current,
-        #                         swiggy_db, doc_swiggy, slink, tick, cross)
+        check_and_update_status("Zomato", zomato_current,
+                                zomato_db, doc_zomato, zlink, tick, cross)
+        check_and_update_status("Swiggy", swiggy_current,
+                                swiggy_db, doc_swiggy, slink, tick, cross)
 
 
 while True:
