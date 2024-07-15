@@ -107,13 +107,13 @@ def swiggy_check():
             status_text = pageStatusLine.text.strip()
             if "Outlet is not accepting orders" in status_text or "Opens today in" in status_text:
                 date = get_date()
-                bot.send_message(
-                    Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
+                # bot.send_message(
+                #     Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
                 return ["Offline", get_date(), "Outlet is not accepting orders"]
         else:
             date = get_date()
-            bot.send_message(
-                Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
+            # bot.send_message(
+            #     Admin, f'{date}\n\n {str(pageStatusLine)}', disable_web_page_preview=True)
             return ["Online", get_date(), "Online"]
 
     except Exception as e:
@@ -168,8 +168,8 @@ def zomato_check():
             if key in pageStatusLine:
                 status = status_map[key]
                 date = get_date()
-                bot.send_message(
-                    Admin, f'{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
+                # bot.send_message(
+                #     Admin, f'{date}\n\n {pageStatusLine}', disable_web_page_preview=True, parse_mode="HTML")
                 return [status, get_date(), status]
 
         return ["Error", get_date(), "Unrecognized status line"]
